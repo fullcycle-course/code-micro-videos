@@ -2060,6 +2060,7 @@
         },
         {
             "name": "symfony/mime",
+
             "version": "v5.1.2",
             "source": {
                 "type": "git",
@@ -2077,6 +2078,9 @@
                 "symfony/polyfill-intl-idn": "^1.10",
                 "symfony/polyfill-mbstring": "^1.0",
                 "symfony/polyfill-php80": "^1.15"
+            },
+            "conflict": {
+                "symfony/mailer": "<4.4"
             },
             "conflict": {
                 "symfony/mailer": "<4.4"
