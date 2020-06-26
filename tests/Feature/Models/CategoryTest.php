@@ -6,8 +6,6 @@ use App\Models\Category;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Tests\TestCase;
 use Ramsey\Uuid\Uuid as RUuid;
-use Illuminate\Foundation\Testing\WithFaker;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class CategoryTest extends TestCase
 {
@@ -99,6 +97,17 @@ class CategoryTest extends TestCase
         foreach($data as $key => $value) {
             $this->assertEquals($value, $category->{$key});
         }
+    }
+
+    public function testDelete()
+    {
+        /** @var Category $category */
+        $category = factory(Category::class)->create()->first();
+        $category->delete();
+        $categoryDeleted = Category::onlyTrashed()->get()->first();
+
+        $this->assertEquals($category->id, $categoryDeleted->id);
+        $this->assertNotNull($categoryDeleted->deleted_at);
     }
 
 }
