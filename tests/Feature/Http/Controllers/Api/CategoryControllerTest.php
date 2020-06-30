@@ -5,8 +5,6 @@ namespace Tests\Feature\Http\Controllers\Api;
 use App\Models\Category;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Tests\TestCase;
-use Illuminate\Foundation\Testing\WithFaker;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class CategoryControllerTest extends TestCase
 {
@@ -160,4 +158,15 @@ class CategoryControllerTest extends TestCase
             'description' => null
         ]);
     }
+
+    public function testDelete()
+    {
+        $category = factory(Category::class)->create();
+
+        $response = $this->json('DELETE', route('categories.destroy', ['category' => $category->id]));
+        $response->assertSuccessful();
+        $category->refresh();
+        $this->assertNotNull($category->deleted_at);
+    }
+
 }
