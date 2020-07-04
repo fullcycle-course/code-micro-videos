@@ -7,13 +7,9 @@ use Illuminate\Http\Request;
 
 abstract class BasicCrudController extends Controller
 {
-    protected abstract function model();
-    protected abstract function rulesStore();
-
-    private $rules = [
-        'name'      => 'required|max:255',
-        'is_active' => 'boolean',
-    ];
+    abstract protected function model();
+    abstract protected function rulesStore();
+    abstract protected  function rulesUpdate();
 
     public function index()
     {
@@ -36,4 +32,25 @@ abstract class BasicCrudController extends Controller
         return $this->model()::where($keyName, $id)->firstOrFail();
     }
 
+    public function show($category)
+    {
+        return $this->findOrFail($category);
+    }
+
+    public function update(Request $request, string $id)
+    {
+        $obj = $this->findOrFail($id);
+        $this->validate($request, $this->rulesUpdate());
+        $obj->update($request->all());
+
+        return $obj;
+    }
+
+    public function destroy(string $id)
+    {
+        $obj = $this->findOrFail($id);
+        $obj->delete();
+
+        return response()->noContent();
+    }
 }
