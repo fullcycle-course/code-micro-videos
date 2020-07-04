@@ -3,42 +3,27 @@
 namespace App\Http\Controllers\Api;
 
 use App\Models\CastMember;
-use Illuminate\Http\Request;
 
 class CastMemberController extends BasicCrudController
 {
-    protected function model()
+    private $rules = [
+        'name' => 'required|max:255',
+        'type' => 'integer',
+    ];
+
+    protected function model(): string
     {
         return CastMember::class;
     }
 
-    protected function rulesStore()
+    protected function rulesStore(): array
     {
-        return [
-            'name' => 'required|max:255',
-            'type' => 'integer',
-        ];
+        return $this->rules;
     }
 
-    public function show($category)
+    protected function rulesUpdate(): array
     {
-        return $this->findOrFail($category);
+        return $this->rules;
     }
 
-    public function update(Request $request, string $categoryId)
-    {
-        $category = $this->findOrFail($categoryId);
-        $this->validate($request, $this->rulesStore());
-        $category->update($request->all());
-
-        return $category;
-    }
-
-    public function destroy(string $categoryId)
-    {
-        $category = $this->findOrFail($categoryId);
-        $category->delete();
-
-        return response()->noContent();
-    }
 }
