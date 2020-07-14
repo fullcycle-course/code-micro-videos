@@ -17,7 +17,9 @@ class CastMemberControllerTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->castMember = factory(CastMember::class)->create();
+        $this->castMember = factory(CastMember::class)->create([
+            'type' => CastMember::TYPE_DIRECTOR,
+        ]);
     }
 
     public function testIndex()
@@ -37,48 +39,48 @@ class CastMemberControllerTest extends TestCase
     {
         $data = [
             'name' => '',
+            'type' => '',
         ];
         $this->assertInvalidationInStoreAction($data, 'required');
         $this->assertInvalidationInUpdateAction($data, 'required');
         $data = [
             'type' => 'a',
         ];
-        $this->assertInvalidationInStoreAction($data, 'integer');
-        $this->assertInvalidationInUpdateAction($data, 'integer');
+        $this->assertInvalidationInStoreAction($data, 'in');
+        $this->assertInvalidationInUpdateAction($data, 'in');
     }
 
     public function testStore()
     {
         $data = [
-            'name' => 'test',
-            'type' => 1,
-        ];
-        $this->assertStore($data, $data + ['deleted_at' => null]);
-
-        $data = [
-            'name' => 'test_2',
-            'type' => 2,
-        ];
-        $this->assertStore(
-            $data,
-            $data,
+            [
+                'name' => 'test',
+                'type' => CastMember::TYPE_DIRECTOR,
+            ],
             [
                 'name' => 'test_2',
-                'type' => 2,
-            ]
-        );
+                'type' => CastMember::TYPE_ACTOR,
+            ],
+        ];
+
+        foreach ($data as $key => $value) {
+            $response  = $this->assertStore($value, $value + ['deleted_at' => null]);
+            $response->assertJsonStructure([
+                'created_at', 'updated_at'
+            ]);
+        }
     }
 
     public function testUpdate()
     {
         $this->castMember = factory(CastMember::class)->create([
             'name' => 'test_1',
-            'type' => 2,
+            'type' => CastMember::TYPE_ACTOR,
         ]);
 
         $data = [
             'name' => 'test_update',
-            'type' => 1,
+            'type' => CastMember::TYPE_DIRECTOR,
         ];
         $this->assertUpdate($data, $data);
     }
