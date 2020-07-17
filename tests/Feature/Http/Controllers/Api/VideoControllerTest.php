@@ -8,9 +8,7 @@ use App\Models\Genre;
 use App\Models\Video;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Http\Request;
-use Mockery\Expectation;
 use Tests\Exceptions\TestException;
-use Tests\Stubs\Models\CategoryStub;
 use Tests\TestCase;
 use Tests\Traits\TestSaves;
 use Tests\Traits\TestValidations;
@@ -37,7 +35,7 @@ class VideoControllerTest extends TestCase
         ];
     }
 
-    public function testIndex()
+    public function testIndex(): void
     {
         $response = $this->get(route('videos.index'));
 
@@ -45,13 +43,13 @@ class VideoControllerTest extends TestCase
             ->assertJson([$this->video->toArray()]);
     }
 
-    public function testShow()
+    public function testShow(): void
     {
         $response = $this->get(route('videos.show', ['video' => $this->video->id]));
         $response->assertStatus(200)->assertJson($this->video->toArray());
     }
 
-    public function testInvalidationRequired()
+    public function testInvalidationRequired(): void
     {
         $data = [
             'title'         => '',
@@ -66,7 +64,7 @@ class VideoControllerTest extends TestCase
         $this->assertInvalidationInUpdateAction($data, 'required');
     }
 
-    public function testInvalidationMax()
+    public function testInvalidationMax(): void
     {
         $data = [
             'title' => str_repeat('a', 256),
@@ -75,7 +73,7 @@ class VideoControllerTest extends TestCase
         $this->assertInvalidationInUpdateAction($data, 'max.string', ['max' => 255]);
     }
 
-    public function testInvalidationInteger()
+    public function testInvalidationInteger(): void
     {
         $data = [
             'duration' => 'a',
@@ -84,7 +82,7 @@ class VideoControllerTest extends TestCase
         $this->assertInvalidationInUpdateAction($data, 'integer');
     }
 
-    public function testInvalidationYearLaunchedField()
+    public function testInvalidationYearLaunchedField(): void
     {
         $data   = [
             'year_launched' => 'a',
@@ -94,7 +92,7 @@ class VideoControllerTest extends TestCase
         $this->assertInvalidationInUpdateAction($data, 'date_format', $format);
     }
 
-    public function testInvalidationOpenedField()
+    public function testInvalidationOpenedField(): void
     {
         $data = [
             'opened' => 's',
@@ -103,7 +101,7 @@ class VideoControllerTest extends TestCase
         $this->assertInvalidationInUpdateAction($data, 'boolean');
     }
 
-    public function testInvalidationRatingField()
+    public function testInvalidationRatingField(): void
     {
         $data = [
             'rating' => 0,
@@ -112,7 +110,7 @@ class VideoControllerTest extends TestCase
         $this->assertInvalidationInUpdateAction($data, 'in');
     }
 
-    public function testInvalidationCategoriesIdField()
+    public function testInvalidationCategoriesIdField(): void
     {
         $data = [
             'categories_id' => 'a',
@@ -126,7 +124,7 @@ class VideoControllerTest extends TestCase
         $this->assertInvalidationInUpdateAction($data, 'exists');
     }
 
-    public function testInvalidationGenresIdField()
+    public function testInvalidationGenresIdField(): void
     {
         $data = [
             'genres_id' => 'a',
@@ -142,7 +140,9 @@ class VideoControllerTest extends TestCase
 
     public function testSave(): void
     {
+        /** @var Category $category */
         $category = factory(Category::class)->create();
+        /** @var Genre $genre */
         $genre    = factory(Genre::class)->create();
         $data     = [
             [
@@ -184,7 +184,7 @@ class VideoControllerTest extends TestCase
         }
     }
 
-    public function testRollbackStore()
+    public function testRollbackStore(): void
     {
         $controller = \Mockery::mock(VideoController::class)
             ->makePartial()
@@ -213,7 +213,7 @@ class VideoControllerTest extends TestCase
     }
 
 
-    public function testDelete()
+    public function testDelete(): void
     {
         $response = $this->json('DELETE', route('videos.destroy', ['video' => $this->video->id]));
         $response->assertSuccessful();
