@@ -142,6 +142,7 @@ class GenreControllerTest extends TestCase
     {
         /** @var Category $category */
         $category = factory(Category::class)->create();
+
         $data     = [
             'send_data' => [
                 'name'          => 'test',
