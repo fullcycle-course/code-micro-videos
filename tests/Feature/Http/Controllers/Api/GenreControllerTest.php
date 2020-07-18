@@ -37,36 +37,46 @@ class GenreControllerTest extends TestCase
         $response->assertStatus(200)->assertJson($this->genre->toArray());
     }
 
-    public function testInvalidationData()
+    public function testInvalidationData(): void
     {
-        $response = $this->json('POST', route('genres.store'), []);
-        $this->assertInvalidationRequired($response);
-        $this->assertMissingValidationErrors($response);
+        $data = [
+            'name'          => '',
+            'categories_id' => '',
+        ];
+        $this->assertInvalidationInStoreAction($data, 'required');
+        $this->assertInvalidationInUpdateAction($data, 'required');
 
-        $response = $this->json('POST', route('genres.store'), [
-            'name'      => str_repeat('a', 256),
-            'is_active' => 'g',
-        ]);
-        $this->assertInvalidationMax($response);
-        $this->assertInvalidationBoolean($response);
+        $data = [
+            'name' => str_repeat('a', 256),
+        ];
+        $this->assertInvalidationInStoreAction($data, 'max.string', ['max' => 255]);
+        $this->assertInvalidationInUpdateAction($data, 'max.string', ['max' => 255]);
 
-        $genre    = factory(Genre::class)->create();
-        $response = $this->json('PUT', route('genres.update', ['genre' => $genre->id]), []);
-        $this->assertInvalidationRequired($response);
-        $this->assertMissingValidationErrors($response);
+        $data = [
+            'is_active' => 'a',
+        ];
+        $this->assertInvalidationInStoreAction($data, 'boolean');
+        $this->assertInvalidationInUpdateAction($data, 'boolean');
 
+        $data = [
+            'categories_id' => 'a',
+        ];
+        $this->assertInvalidationInStoreAction($data, 'array');
+        $this->assertInvalidationInUpdateAction($data, 'array');
 
-        $genre    = factory(Genre::class)->create();
-        $response = $this->json(
-            'PUT',
-            route('genres.update', ['genre' => $genre->id]),
-            [
-                'name'      => str_repeat('a', 256),
-                'is_active' => 'g',
-            ]
-        );
-        $this->assertInvalidationMax($response);
-        $this->assertInvalidationBoolean($response);
+        $data = [
+            'categories_id' => [100],
+        ];
+        $this->assertInvalidationInStoreAction($data, 'exists');
+        $this->assertInvalidationInUpdateAction($data, 'exists');
+
+        $category = factory(Category::class)->create();
+        $category->delete();
+        $data = [
+            'categories_id' => [$category->id],
+        ];
+        $this->assertInvalidationInStoreAction($data, 'exists');
+        $this->assertInvalidationInUpdateAction($data, 'exists');
     }
 
     /**
