@@ -122,6 +122,15 @@ class VideoControllerTest extends TestCase
         ];
         $this->assertInvalidationInStoreAction($data, 'exists');
         $this->assertInvalidationInUpdateAction($data, 'exists');
+
+        $category = factory(Category::class)->create();
+        $category->delete();
+        $data = [
+            'categories_id' => [$category->id],
+        ];
+        $this->assertInvalidationInStoreAction($data, 'exists');
+        $this->assertInvalidationInUpdateAction($data, 'exists');
+
     }
 
     public function testInvalidationGenresIdField(): void
@@ -131,39 +140,47 @@ class VideoControllerTest extends TestCase
         ];
         $this->assertInvalidationInStoreAction($data, 'array');
         $this->assertInvalidationInUpdateAction($data, 'array');
+
         $data = [
             'genres_id' => [100],
         ];
         $this->assertInvalidationInStoreAction($data, 'exists');
         $this->assertInvalidationInUpdateAction($data, 'exists');
+
+        $genre = factory(Genre::class)->create();
+        $genre->delete();
+        $data = [
+            'genres_id' => [$genre->id],
+        ];
+        $this->assertInvalidationInStoreAction($data, 'exists');
+        $this->assertInvalidationInUpdateAction($data, 'exists');
+
     }
 
     public function testSave(): void
     {
-        /** @var Category $category */
-        $category = factory(Category::class)->create();
-        /** @var Genre $genre */
-        $genre    = factory(Genre::class)->create();
-        $data     = [
+        $categoryId = factory(Category::class)->create()->id;
+        $genreId = factory(Genre::class)->create()->id;
+        $data  = [
             [
                 'send_data' => $this->sendData + [
-                        'categories_id' => [$category->id],
-                        'genres_id'     => [$genre->id],
+                        'categories_id' => [$categoryId],
+                        'genres_id'     => [$genreId],
                     ],
                 'test_data' => $this->sendData + ['opened' => false, 'deleted_at' => null],
             ],
             [
                 'send_data' => $this->sendData + [
-                        'categories_id' => [$category->id],
-                        'genres_id'     => [$genre->id],
+                        'categories_id' => [$categoryId],
+                        'genres_id'     => [$genreId],
                         'opened'        => true,
                     ],
                 'test_data' => $this->sendData + ['opened' => true],
             ],
             [
                 'send_data' => $this->sendData + [
-                        'categories_id' => [$category->id],
-                        'genres_id'     => [$genre->id],
+                        'categories_id' => [$categoryId],
+                        'genres_id'     => [$genreId],
                         'rating'        => Video::RATING_LIST[2],
                     ],
                 'test_data' => $this->sendData + ['rating' => Video::RATING_LIST[2]],

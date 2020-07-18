@@ -20,6 +20,4 @@ class Category extends Model
         'is_active' => 'boolean',
     ];
     public    $incrementing = false;
-
-
 }
