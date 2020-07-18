@@ -6,11 +6,12 @@ use App\Http\Controllers\Controller;
 use App\Models\Genre;
 use Illuminate\Http\Request;
 
-class GenreController extends Controller
+class GenreController extends BasicCrudController
 {
     private $rules = [
         'name' => 'required|max:255',
         'is_active' => 'boolean',
+        'categories_id' => 'required|array|exists:categories,id',
     ];
 
     public function index()
@@ -20,27 +21,50 @@ class GenreController extends Controller
 
     public function store(Request $request)
     {
-        $this->validate($request, $this->rules);
-        $genre =  Genre::create($request->all());
-        $genre->refresh();
-        return $genre;
+        $validatedData = $this->validate($request, $this->rulesStore());
+        $self = $this;
+        $obj = \DB::transaction(function() use($request, $validatedData, $self) {
+            /** @var Genre $obj */
+            $obj = $this->model()::create($validatedData);
+            $self->handleRelations($obj, $request);
+            return $obj;
+        });
+        $obj->refresh();
+        return $obj;
     }
 
-    public function show(Genre $genre)
+    public function update(Request $request, string $id)
     {
-        return $genre;
+        $obj = $this->findOrFail($id);
+        $this->validate($request, $this->rulesUpdate());
+        $self = $this;
+        $obj = \DB::transaction(function() use($request, $obj, $self){
+            $obj->update($request->all());
+            $self->handleRelations($obj, $request);
+
+            return $obj;
+        });
+        return $obj;
     }
 
-    public function update(Request $request, Genre $genre)
+    protected function handleRelations($genre, Request $request): void
     {
-        $this->validate($request, $this->rules);
-        $genre->update($request->all());
-        return $genre;
+        $genre->categories()->sync($request->get('categories_id'));
     }
 
-    public function destroy(Genre $genre)
+    protected function model(): string
     {
-        $genre->delete();
-        return response()->noContent();
+        return Genre::class;
     }
+
+    protected function rulesStore(): array
+    {
+        return $this->rules;
+    }
+
+    protected function rulesUpdate(): array
+    {
+        return $this->rules;
+    }
+
 }
