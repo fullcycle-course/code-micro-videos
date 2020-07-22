@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use App\Models\Traits\UploadFiles;
 use App\Models\Traits\Uuid;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Video extends Model
 {
-    use SoftDeletes, Uuid;
+    use SoftDeletes, Uuid, UploadFiles;
 
     const RATING_LIST = ['L', '10', '14', '16', '18'];
 
@@ -19,6 +20,7 @@ class Video extends Model
         'opened',
         'rating',
         'duration',
+        'video_file'
     ];
 
     protected $dates = ['deleted_at'];
@@ -31,14 +33,77 @@ class Video extends Model
     ];
 
     public $incrementing = false;
+    public static $fileFields = ['video_file'];
+
+    public static function create(array $attributes)
+    {
+        $files = self::extractFiles($attributes);
+        try {
+            \DB::beginTransaction();
+            /** @var Video $obj */
+            $obj = static::query()->create($attributes);
+            static::handleRelations($obj, $attributes);
+            $obj->uploadFiles($files);
+            \DB::commit();
+
+            return $obj;
+        }
+        catch (\Exception $e) {
+            if (isset($obj)) {
+
+            }
+            \DB::rollBack();
+            throw $e;
+        }
+    }
+
+    public function update(array $attributes = [], array $options = [])
+    {
+        try {
+            \DB::beginTransaction();
+            $isSaved = parent::update($attributes, $options);
+            static::handleRelations($this, $attributes);
+            if ($isSaved) {
+                // uploads aqui
+                // excluir os antigos
+            }
+            \DB::commit();
+
+            return $isSaved;
+        }
+        catch (\Exception $e) {
+            // excluir os arquivos de uploads
+            \DB::rollBack();
+            throw $e;
+        }
+    }
+
+    public static function handleRelations(Video $video, array $attributes): void
+    {
+        if (isset($attributes['categories_id'])) {
+            $video->categories()->sync($attributes['categories_id']);
+        }
+
+        if (isset($attributes['genres_id'])) {
+            $video->genres()->sync($attributes['genres_id']);
+        }
+    }
+
 
     public function categories()
     {
-        return $this->belongsToMany(Category::class);
+        return $this->belongsToMany(Category::class)->withTrashed();
     }
 
     public function genres()
     {
-        return $this->belongsToMany(Genre::class);
+        return $this->belongsToMany(Genre::class)->withTrashed();
     }
+
+    protected function uploadDir()
+    {
+        return $this->id;
+    }
+
+
 }

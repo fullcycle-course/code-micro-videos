@@ -2,13 +2,11 @@
 
 namespace Tests\Feature\Http\Controllers\Api;
 
-use App\Http\Controllers\Api\VideoController;
 use App\Models\Category;
 use App\Models\Genre;
 use App\Models\Video;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
-use Illuminate\Http\Request;
-use Tests\Exceptions\TestException;
+use Illuminate\Http\UploadedFile;
 use Tests\TestCase;
 use Tests\Traits\TestSaves;
 use Tests\Traits\TestValidations;
@@ -157,11 +155,39 @@ class VideoControllerTest extends TestCase
 
     }
 
+    public function testInvalidVideoFielField(): void
+    {
+        $data = [
+            'video_file' => 'a',
+        ];
+        $this->assertInvalidationInStoreAction($data, 'file');
+        $this->assertInvalidationInUpdateAction($data, 'file');
+
+        \Storage::fake();
+        $file = UploadedFile::fake()->create('video.pdf', 1000, 'application/pdf');
+        $data = [
+            'video_file' => $file,
+        ];
+        $this->assertInvalidationInStoreAction($data, 'mimetypes', ['values' => 'video/mp4']);
+        $this->assertInvalidationInUpdateAction($data, 'mimetypes', ['values' => 'video/mp4']);
+
+        $file = UploadedFile::fake()->create('video.mp4', 11000);
+        $data = [
+            'video_file' => $file,
+        ];
+        $this->assertInvalidationInStoreAction($data, 'max.file', ['max' => '10000']);
+        $this->assertInvalidationInUpdateAction($data, 'max.file', ['max' => '10000']);
+
+    }
+
     public function testSave(): void
     {
         $categoryId = factory(Category::class)->create()->id;
-        $genreId = factory(Genre::class)->create()->id;
-        $data  = [
+        $genre      = factory(Genre::class)->create();
+        $genre->categories()->sync($categoryId);
+        $genreId = $genre->id;
+
+        $data = [
             [
                 'send_data' => $this->sendData + [
                         'categories_id' => [$categoryId],
@@ -201,34 +227,32 @@ class VideoControllerTest extends TestCase
         }
     }
 
-    public function testRollbackStore(): void
+    public function testUploadFile(): void
     {
-        $controller = \Mockery::mock(VideoController::class)
-            ->makePartial()
-            ->shouldAllowMockingProtectedMethods();
+        \Storage::fake();
 
-        $controller->shouldReceive('validate')
-            ->withAnyArgs()
-            ->andReturn($this->sendData);
+        $categoryId = factory(Category::class)->create()->id;
+        $genre      = factory(Genre::class)->create();
+        $genre->categories()->sync($categoryId);
+        $genreId = $genre->id;
+        $file    = UploadedFile::fake()->create('video.mp4', 5000);
 
-        $controller->shouldReceive('rulesStore')
-            ->withAnyArgs()
-            ->andReturn([]);
+        $data     = [
+            'send_data' => $this->sendData + [
+                    'categories_id' => [$categoryId],
+                    'genres_id'     => [$genreId],
+                    'video_file'    => $file,
+                ],
+            'test_data' => $this->sendData + [
+                    'opened'     => false,
+                    'deleted_at' => null,
+                    'video_file' => $file->hashName(),
+                ],
+        ];
+        $response = $this->assertStore($data['send_data'], $data['test_data']);
+        \Storage::assertExists("{$response->json('id')}/{$file->hashName()}");
 
-        $request = \Mockery::mock(Request::class);
-
-        $controller->shouldReceive('handleRelations')
-            ->once()
-            ->andThrow(new TestException());
-
-        try {
-            $controller->store($request);
-        }
-        catch (TestException $e) {
-            $this->assertCount(1, Video::all());
-        }
     }
-
 
     public function testDelete(): void
     {
