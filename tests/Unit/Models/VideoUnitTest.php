@@ -2,6 +2,7 @@
 
 namespace Tests\Unit\Models;
 
+use App\Models\Traits\UploadFiles;
 use App\Models\Video;
 use App\Models\Traits\Uuid;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -20,7 +21,7 @@ class VideoUnitTest extends TestCase
 
     public function testFillableAttribute(): void
     {
-        $fillable = ['title', 'description', 'year_launched', 'opened','rating', 'duration'];
+        $fillable = ['title', 'description', 'year_launched', 'opened','rating', 'duration', 'video_file'];
         $this->assertEquals($fillable, $this->video->getFillable());
     }
 
@@ -29,6 +30,7 @@ class VideoUnitTest extends TestCase
         $traits         = [
             SoftDeletes::class,
             Uuid::class,
+            UploadFiles::class,
         ];
         $videoTraits = array_keys(class_uses(Video::class));
         $this->assertEquals($traits, $videoTraits);
