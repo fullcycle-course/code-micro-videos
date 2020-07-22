@@ -219,15 +219,11 @@ class VideoControllerTest extends TestCase
                 'created_at',
                 'updated_at',
             ]);
-            $this->assertHasCategory($response->json('id'), $value['send_data']['categories_id'][0]);
-            $this->assertHasGenre($response->json('id'), $value['send_data']['genres_id'][0]);
             $response = $this->assertUpdate($value['send_data'], $value['test_data']);
             $response->assertJsonStructure([
                 'created_at',
                 'updated_at',
             ]);
-            $this->assertHasCategory($response->json('id'), $value['send_data']['categories_id'][0]);
-            $this->assertHasGenre($response->json('id'), $value['send_data']['genres_id'][0]);
         }
     }
 
