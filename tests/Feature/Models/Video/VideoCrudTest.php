@@ -1,38 +1,16 @@
 <?php
 
-namespace Tests\Feature\Models;
 
+namespace Tests\Feature\Models\Video;
+
+use App\Models\Video;
 use App\Models\Category;
 use App\Models\Genre;
-use App\Models\Video;
 use Illuminate\Database\QueryException;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Ramsey\Uuid\Uuid as RUuid;
-use Tests\TestCase;
 
-class VideoTest extends TestCase
+class VideoCrudTest extends BaseVideoTestCase
 {
-    use DatabaseMigrations;
-
-    private $data;
-
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $this->data = [
-            'title'         => 'title',
-            'description'   => 'description',
-            'year_launched' => 2010,
-            'rating'        => Video::RATING_LIST[0],
-            'duration'      => 120,
-        ];;
-    }
-
-    /**
-     * A basic feature test example.
-     *
-     * @return void
-     */
     public function testList(): void
     {
         factory(Video::class)->create();
@@ -124,7 +102,7 @@ class VideoTest extends TestCase
         $this->assertHasGenre($video->id, $genre->id);
     }
 
-    public function testHandleRelations()
+    public function testHandleRelations(): void
     {
         $video = factory(Video::class)->create();
         Video::handleRelations($video, []);
@@ -179,7 +157,7 @@ class VideoTest extends TestCase
         $this->assertTrue($hasError);
     }
 
-    public function testRollbackUpdate()
+    public function testRollbackUpdate(): void
     {
         $video    = factory(Video::class)->create();
         $oldTitle = $video->title;
@@ -219,5 +197,4 @@ class VideoTest extends TestCase
             'genre_id' => $genreId,
         ]);
     }
-
 }

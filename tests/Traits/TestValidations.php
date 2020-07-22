@@ -12,7 +12,7 @@ trait TestValidations
         array $data,
         string $rule,
         $ruleParams = []
-    ) {
+    ): void {
         $response = $this->json('POST', $this->routeStore(), $data);
         $fields = array_keys($data);
         $this->assertInvalidationFields($response, $fields, $rule, $ruleParams);
@@ -22,7 +22,7 @@ trait TestValidations
         array $data,
         string $rule,
         $ruleParams = []
-    ) {
+    ): void {
         $response = $this->json('PUT', $this->routeUpdate(), $data);
         $fields = array_keys($data);
         $this->assertInvalidationFields($response, $fields, $rule, $ruleParams);
@@ -33,7 +33,7 @@ trait TestValidations
         array $fields,
         string $rule,
         array $ruleParams = []
-    ) {
+    ): void {
         $response->assertStatus(422)
             ->assertJsonValidationErrors($fields);
 
@@ -42,7 +42,6 @@ trait TestValidations
             $response->assertJsonFragment([
                 \Lang::get("validation.{$rule}", ['attribute' => $fieldName] + $ruleParams),
             ]);
-
         }
     }
 }
