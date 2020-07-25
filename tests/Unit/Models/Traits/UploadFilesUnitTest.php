@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Unit\Models;
+namespace Tests\Unit\Models\Traits;
 
 use App\Models\Category;
 use App\Models\Traits\Uuid;
