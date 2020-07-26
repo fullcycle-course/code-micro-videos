@@ -10,6 +10,7 @@ use Illuminate\Http\UploadedFile;
 
 class VideoControllerCrudTest extends BaseVideoControllerTestCase
 {
+
     public function testIndex(): void
     {
         $response = $this->get(route('videos.index'));
@@ -148,7 +149,7 @@ class VideoControllerCrudTest extends BaseVideoControllerTestCase
         $this->assertInvalidationInStoreAction($data, 'mimetypes', ['values' => 'video/mp4']);
         $this->assertInvalidationInUpdateAction($data, 'mimetypes', ['values' => 'video/mp4']);
 
-        $file = UploadedFile::fake()->create('video.mp4', 11000);
+        $file = UploadedFile::fake()->create('video.mp4', 51000);
         $data = [
             'video_file' => $file,
         ];
