@@ -67,6 +67,12 @@ class VideoUnitTest extends TestCase
         $this->assertTrue(method_exists($this->video, 'genres'));
     }
 
+    public function testMutators(): void
+    {
+        $this->assertTrue(method_exists($this->video, 'getVideoFileUrlAttribute'));
+        $this->assertTrue(method_exists($this->video, 'getThumbFileUrlAttribute'));
+    }
+
     public function testConstRatingList(): void
     {
         $this->assertIsArray(Video::RATING_LIST);

@@ -125,7 +125,6 @@ class VideoCrudTest extends BaseVideoTestCase
         $this->assertHasGenre($video->id, $genre->id);
     }
 
-
     public function testHandleRelations(): void
     {
         $video = factory(Video::class)->create();
@@ -204,5 +203,19 @@ class VideoCrudTest extends BaseVideoTestCase
         }
 
         $this->assertTrue($hasError);
+    }
+
+    public function testFilesUrl(): void
+    {
+        \Storage::fake();
+        $video = Video::create(
+            $this->data + [
+                'thumb_file'   => UploadedFile::fake()->image('thumb.jpg'),
+                'video_file'   => UploadedFile::fake()->image('video.mp4'),
+            ]
+        );
+        $video->refresh();
+        $this->assertNotNull($video->video_file_url);
+        $this->assertNotNull($video->thumb_file_url);
     }
 }
