@@ -7,6 +7,7 @@ namespace App\Models\Traits;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Storage;
 
 trait UploadFiles
 {
@@ -75,5 +76,19 @@ trait UploadFiles
             }
         }
         return $files;
+    }
+
+    /**
+     * @param $fileName
+     *
+     * @return string | null
+     */
+    public static function getFileUrl($fileName)
+    {
+        if (empty($fileName)) {
+            return null;
+        }
+
+        return Storage::url($fileName);
     }
 }

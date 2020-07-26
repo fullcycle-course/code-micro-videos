@@ -38,6 +38,17 @@ class Video extends Model
     public $incrementing = false;
     public static $fileFields = ['video_file', 'thumb_file', 'banner_file', 'trailer_file'];
 
+
+    public function getVideoFileUrlAttribute()
+    {
+        return self::getFileUrl($this->video_file);
+    }
+
+    public function getThumbFileUrlAttribute()
+    {
+        return self::getFileUrl($this->thumb_file);
+    }
+
     public static function create(array $attributes)
     {
         $files = self::extractFiles($attributes);
