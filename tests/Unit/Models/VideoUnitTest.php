@@ -21,7 +21,7 @@ class VideoUnitTest extends TestCase
 
     public function testFillableAttribute(): void
     {
-        $fillable = ['title', 'description', 'year_launched', 'opened','rating', 'duration', 'video_file', 'thumb_file'];
+        $fillable = ['title', 'description', 'year_launched', 'opened','rating', 'duration', 'video_file', 'thumb_file', 'banner_file', 'trailer_file'];
         $this->assertEquals($fillable, $this->video->getFillable());
     }
 
@@ -65,6 +65,12 @@ class VideoUnitTest extends TestCase
     {
         $this->assertTrue(method_exists($this->video, 'categories'));
         $this->assertTrue(method_exists($this->video, 'genres'));
+    }
+
+    public function testMutators(): void
+    {
+        $this->assertTrue(method_exists($this->video, 'getVideoFileUrlAttribute'));
+        $this->assertTrue(method_exists($this->video, 'getThumbFileUrlAttribute'));
     }
 
     public function testConstRatingList(): void

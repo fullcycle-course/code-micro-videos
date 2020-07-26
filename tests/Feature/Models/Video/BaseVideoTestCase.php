@@ -24,5 +24,19 @@ abstract class BaseVideoTestCase extends TestCase
         ];
     }
 
+    protected function assertHasCategory($videoId, $categoryId): void
+    {
+        $this->assertDatabaseHas('category_video', [
+            'video_id'    => $videoId,
+            'category_id' => $categoryId,
+        ]);
+    }
 
+    protected function assertHasGenre($videoId, $genreId): void
+    {
+        $this->assertDatabaseHas('genre_video', [
+            'video_id' => $videoId,
+            'genre_id' => $genreId,
+        ]);
+    }
 }

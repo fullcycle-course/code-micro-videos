@@ -6,8 +6,6 @@ use App\Models\Video;
 use App\Models\Category;
 use App\Models\Genre;
 
-use Illuminate\Http\UploadedFile;
-
 class VideoControllerCrudTest extends BaseVideoControllerTestCase
 {
     public function testIndex(): void
@@ -129,31 +127,6 @@ class VideoControllerCrudTest extends BaseVideoControllerTestCase
         ];
         $this->assertInvalidationInStoreAction($data, 'exists');
         $this->assertInvalidationInUpdateAction($data, 'exists');
-
-    }
-
-    public function testInvalidVideoFielField(): void
-    {
-        $data = [
-            'video_file' => 'a',
-        ];
-        $this->assertInvalidationInStoreAction($data, 'file');
-        $this->assertInvalidationInUpdateAction($data, 'file');
-
-        \Storage::fake();
-        $file = UploadedFile::fake()->create('video.pdf', 1000, 'application/pdf');
-        $data = [
-            'video_file' => $file,
-        ];
-        $this->assertInvalidationInStoreAction($data, 'mimetypes', ['values' => 'video/mp4']);
-        $this->assertInvalidationInUpdateAction($data, 'mimetypes', ['values' => 'video/mp4']);
-
-        $file = UploadedFile::fake()->create('video.mp4', 11000);
-        $data = [
-            'video_file' => $file,
-        ];
-        $this->assertInvalidationInStoreAction($data, 'max.file', ['max' => '10000']);
-        $this->assertInvalidationInUpdateAction($data, 'max.file', ['max' => '10000']);
 
     }
 

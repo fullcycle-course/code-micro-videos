@@ -18,7 +18,25 @@ class VideoControllerUploadsTest extends BaseVideoControllerTestCase
         $this->assertInvalidationFile(
             'video_file',
             'mp4',
+            50000000,
+            'mimetypes', ['values' => 'video/mp4']
+        );
+        $this->assertInvalidationFile(
+            'thumb_file',
+            'jpg',
+            5000,
+            'mimetypes', ['values' => 'image/jpeg']
+        );
+        $this->assertInvalidationFile(
+            'banner_file',
+            'jpg',
             10000,
+            'mimetypes', ['values' => 'image/jpeg']
+        );
+        $this->assertInvalidationFile(
+            'trailer_file',
+            'mp4',
+            1000000,
             'mimetypes', ['values' => 'video/mp4']
         );
     }
@@ -51,7 +69,10 @@ class VideoControllerUploadsTest extends BaseVideoControllerTestCase
     protected function getFiles(): array
     {
         return [
-            'video_file' => UploadedFile::fake()->create('video_file.mp4')
+            'video_file'   => UploadedFile::fake()->create('video_file.mp4'),
+            'thumb_file'   => UploadedFile::fake()->create('thumb_file.jpg'),
+            'banner_file'  => UploadedFile::fake()->create('banner_file.jpg'),
+            'trailer_file' => UploadedFile::fake()->create('trailer_file.mp4'),
         ];
     }
 

@@ -35,6 +35,4 @@ class UploadFilesStub extends Model
     {
         return '1';
     }
-
-
 }

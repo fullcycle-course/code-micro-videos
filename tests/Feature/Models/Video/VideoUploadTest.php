@@ -3,6 +3,8 @@
 namespace Feature\Models\Video;
 
 use App\Models\Video;
+use App\Models\Category;
+use App\Models\Genre;
 use Illuminate\Database\Events\TransactionCommitted;
 use Illuminate\Http\UploadedFile;
 use Tests\Exceptions\TestException;
@@ -10,71 +12,88 @@ use Tests\Feature\Models\Video\BaseVideoTestCase;
 
 class VideoUploadTest extends BaseVideoTestCase
 {
-    public function testCreateWithFiles(): void
+    protected $fileFieldsData;
+
+    protected function setUp(): void
     {
-        \Storage::fake();
-        $video = Video::create(
-            $this->data + [
-                'thumb_file' => UploadedFile::fake()->image('thumb.jpg'),
-                'video_file' => UploadedFile::fake()->image('video.mp4'),
-            ]
-        );
-        \Storage::assertExists("{$video->id}/{$video->thumb_file}");
-        \Storage::assertExists("{$video->id}/{$video->video_file}");
+        parent::setUp();
+        foreach (Video::$fileFields as $field) {
+            $this->fileFieldsData[$field] = "$field.test";
+        }
     }
 
-    public function testCreateIfRollbackFiles(): void
+    public function testUpdateWithBasicFields(): void
     {
-        \Storage::fake();
-        \Event::listen(TransactionCommitted::class, function () {
-            throw new TestException();
-        });
-        $hasError = false;
-
-        try {
-            $video = Video::create(
-                $this->data + [
-                    'thumb_file' => UploadedFile::fake()->image('thumb.jpg'),
-                    'video_file' => UploadedFile::fake()->image('video.mp4'),
-                ]
-            );
-        }
-        catch (TestException $e) {
-            $this->assertCount(0, \Storage::allFiles());
-            $hasError = true;
+        /** @var Video $genre */
+        $video = factory(Video::class)->create([
+            'opened' => false,
+        ]);
+        $video->update($this->data + $this->fileFieldsData);
+        foreach ($this->data as $key => $value) {
+            $this->assertEquals($value, $video->{$key});
         }
 
-        $this->assertTrue($hasError);
+        $this->assertFalse($video->opened);
+        $this->assertDatabaseHas('videos', $this->data + ['opened' => false]);
+
+        $video = factory(Video::class)->create([
+            'opened' => false,
+        ]);
+        $video->update($this->data + $this->fileFieldsData + ['opened' => true]);
+        $this->assertTrue($video->opened);
+        $this->assertDatabaseHas('videos', $this->data + $this->fileFieldsData + ['opened' => true]);
+    }
+
+    public function testUpdateWithRelations(): void
+    {
+        $category = factory(Category::class)->create();
+        $genre    = factory(Genre::class)->create();
+        $video    = factory(Video::class)->create();
+        $video->update($this->data + [
+                'categories_id' => [$category->id],
+                'genres_id'     => [$genre->id],
+            ]);
+
+        $this->assertHasCategory($video->id, $category->id);
+        $this->assertHasGenre($video->id, $genre->id);
     }
 
     public function testUpdateWithFiles(): void
     {
         \Storage::fake();
-        $video     = factory(Video::class)->create();
-        $thumbFile = UploadedFile::fake()->image('thumb.jpg');
-        $videoFile = UploadedFile::fake()->create('video.mp4');
+        $video       = factory(Video::class)->create();
+        $thumbFile   = UploadedFile::fake()->image('thumb.jpg');
+        $videoFile   = UploadedFile::fake()->create('video.mp4');
+        $bannerFile  = UploadedFile::fake()->create('banner.jpg');
+        $trailerFile = UploadedFile::fake()->create('video.mp4');
         $video->update($this->data + [
-                'thumb_file' => $thumbFile,
-                'video_file' => $videoFile,
+                'thumb_file'   => $thumbFile,
+                'video_file'   => $videoFile,
+                'banner_file'  => $bannerFile,
+                'trailer_file' => $trailerFile,
             ]
         );
         \Storage::assertExists("{$video->id}/{$video->thumb_file}");
         \Storage::assertExists("{$video->id}/{$video->video_file}");
 
         $newVideoFile = UploadedFile::fake()->image('video.mp4');
+        $newBannerFile = UploadedFile::fake()->image('banner.jpg');
         $video->update($this->data + [
                 'video_file' => $newVideoFile,
+                'banner_file' => $newBannerFile,
             ]
         );
         \Storage::assertExists("{$video->id}/{$thumbFile->hashName()}");
         \Storage::assertExists("{$video->id}/{$newVideoFile->hashName()}");
+        \Storage::assertExists("{$video->id}/{$newBannerFile->hashName()}");
         \Storage::assertMissing("{$video->id}/{$videoFile->hashName()}");
+        \Storage::assertMissing("{$video->id}/{$bannerFile->hashName()}");
     }
 
     public function testUpdateIfRollbackFiles(): void
     {
         \Storage::fake();
-        $video     = factory(Video::class)->create();
+        $video = factory(Video::class)->create();
         \Event::listen(TransactionCommitted::class, function () {
             throw new TestException();
         });
