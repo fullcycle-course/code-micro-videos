@@ -25,7 +25,10 @@ class VideoController extends BasicCrudController
                 'array',
                 'exists:genres,id,deleted_at,NULL',
             ],
-            'video_file' => 'nullable|file|mimetypes:video/mp4|max:10000'
+            'video_file'    => 'nullable|file|mimetypes:video/mp4|max:50000000',
+            'thumb_file'    => 'nullable|file|mimetypes:image/jpeg|max:5000',
+            'banner_file'   => 'nullable|file|mimetypes:image/jpeg|max:10000',
+            'trailer_file'  => 'nullable|file|mimetypes:video/mp4|max:1000000',
         ];
     }
 
@@ -36,6 +39,7 @@ class VideoController extends BasicCrudController
         /** @var Video $obj */
         $obj = $this->model()::create($validatedData);
         $obj->refresh();
+
         return $obj;
     }
 
@@ -45,6 +49,7 @@ class VideoController extends BasicCrudController
         $this->addRuleInfGenreHasCategories($request);
         $validatedData = $this->validate($request, $this->rulesUpdate());
         $obj->update($validatedData);
+
         return $obj;
     }
 
