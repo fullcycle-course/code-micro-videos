@@ -29,27 +29,32 @@ trait UploadFiles
         });
     }
 
+    public function relativeFilePath($value): string
+    {
+        return "{$this->uploadDir()}/{$value}";
+    }
+
     /**
      * @param \Illuminate\Http\UploadedFile[] $files
      */
-    public function uploadFiles(array $files)
+    public function uploadFiles(array $files): void
     {
         foreach ($files as $file) {
             $this->uploadFile($file);
         }
     }
 
-    public function uploadFile(UploadedFile $file)
+    public function uploadFile(UploadedFile $file): void
     {
         $file->store($this->uploadDir());
     }
 
-    public function deleteOldFiles()
+    public function deleteOldFiles(): void
     {
         $this->deleteFiles($this->oldFiles);
     }
 
-    public function deleteFiles(array $files)
+    public function deleteFiles(array $files): void
     {
         foreach ($files as $file) {
             $this->deleteFile($file);
@@ -60,13 +65,13 @@ trait UploadFiles
     /**
      * @param string|UploadedFile $file
      */
-    public function deleteFile($file)
+    public function deleteFile($file): void
     {
         $filename = $file instanceof UploadedFile ? $file->hashName() : $file;
         \Storage::delete("{$this->uploadDir()}/{$filename}");
     }
 
-    public static function extractFiles(array &$attributes = [])
+    public static function extractFiles(array &$attributes = []): array
     {
         $files = [];
         foreach (self::$fileFields as $file) {
@@ -83,12 +88,12 @@ trait UploadFiles
      *
      * @return string | null
      */
-    public static function getFileUrl($fileName)
+    public function getFileUrl($fileName): ?string
     {
         if (empty($fileName)) {
             return null;
         }
 
-        return Storage::url($fileName);
+        return \Storage::url($this->relativeFilePath($fileName));
     }
 }

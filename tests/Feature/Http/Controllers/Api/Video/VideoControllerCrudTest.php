@@ -5,6 +5,7 @@ namespace Tests\Feature\Http\Controllers\Api\Video;
 use App\Models\Video;
 use App\Models\Category;
 use App\Models\Genre;
+use Illuminate\Support\Arr;
 
 class VideoControllerCrudTest extends BaseVideoControllerTestCase
 {
@@ -130,36 +131,25 @@ class VideoControllerCrudTest extends BaseVideoControllerTestCase
 
     }
 
-    public function testSave(): void
+    public function testSaveWithoutFiles(): void
     {
-        $categoryId = factory(Category::class)->create()->id;
-        $genre      = factory(Genre::class)->create();
-        $genre->categories()->sync($categoryId);
-        $genreId = $genre->id;
-
+        $testData = Arr::except($this->sendData, ['categories_id', 'genres_id']);
         $data = [
             [
-                'send_data' => $this->sendData + [
-                        'categories_id' => [$categoryId],
-                        'genres_id'     => [$genreId],
-                    ],
-                'test_data' => $this->sendData + ['opened' => false, 'deleted_at' => null],
+                'send_data' => $this->sendData,
+                'test_data' => $testData + ['opened' => false, 'deleted_at' => null],
             ],
             [
                 'send_data' => $this->sendData + [
-                        'categories_id' => [$categoryId],
-                        'genres_id'     => [$genreId],
                         'opened'        => true,
                     ],
-                'test_data' => $this->sendData + ['opened' => true],
+                'test_data' => $testData + ['opened' => true],
             ],
             [
                 'send_data' => $this->sendData + [
-                        'categories_id' => [$categoryId],
-                        'genres_id'     => [$genreId],
                         'rating'        => Video::RATING_LIST[2],
                     ],
-                'test_data' => $this->sendData + ['rating' => Video::RATING_LIST[2]],
+                'test_data' => $testData + ['rating' => Video::RATING_LIST[2]],
             ],
         ];
 

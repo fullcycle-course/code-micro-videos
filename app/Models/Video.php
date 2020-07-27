@@ -13,6 +13,12 @@ class Video extends Model
 
     const RATING_LIST = ['L', '10', '14', '16', '18'];
 
+    public const THUMB_FILE_MAX_SIZE   = 1024 * 5; // 5MB
+    public const BANNER_FILE_MAX_SIZE  = 1024 * 10; // 10MB
+    public const TRAILER_FILE_MAX_SIZE = 1024 * 1024 * 1; // 1GB
+    public const VIDEO_FILE_MAX_SIZE   = 1024 * 1024 * 50; // 50GB
+
+
     protected $fillable = [
         'title',
         'description',
@@ -23,7 +29,7 @@ class Video extends Model
         'video_file',
         'thumb_file',
         'banner_file',
-        'trailer_file'
+        'trailer_file',
     ];
 
     protected $dates = ['deleted_at'];
@@ -35,28 +41,40 @@ class Video extends Model
         'duration'      => 'integer',
     ];
 
-    public $incrementing = false;
-    public static $fileFields = ['video_file', 'thumb_file', 'banner_file', 'trailer_file'];
+    public        $incrementing = false;
+    public static $fileFields   = ['video_file', 'thumb_file', 'banner_file', 'trailer_file'];
 
 
     public function getVideoFileUrlAttribute()
     {
-        return self::getFileUrl($this->video_file);
+        return $this->getFileUrl($this->video_file);
     }
 
     public function getThumbFileUrlAttribute()
     {
-        return self::getFileUrl($this->thumb_file);
+        return $this->getFileUrl($this->thumb_file);
     }
 
-    public static function create(array $attributes)
+    public function getBannerFileUrlAttribute()
+    {
+        return $this->getFileUrl($this->banner_file);
+    }
+
+    public function getTrailerFileUrlAttribute()
+    {
+        return $this->getFileUrl($this->trailer_file);
+    }
+
+    public static function create(array $attributes): ?Video
     {
         $files = self::extractFiles($attributes);
+
         try {
             \DB::beginTransaction();
             /** @var Video $obj */
             $obj = static::query()->create($attributes);
             static::handleRelations($obj, $attributes);
+
             $obj->uploadFiles($files);
             \DB::commit();
 
@@ -71,7 +89,7 @@ class Video extends Model
         }
     }
 
-    public function update(array $attributes = [], array $options = [])
+    public function update(array $attributes = [], array $options = []): ?Video
     {
         $files = self::extractFiles($attributes);
         try {
@@ -85,6 +103,7 @@ class Video extends Model
             if ($isSaved && count($files)) {
                 $this->deleteOldFiles();
             }
+
             return $isSaved;
         }
         catch (\Exception $e) {

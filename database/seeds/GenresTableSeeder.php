@@ -14,9 +14,9 @@ class GenresTableSeeder extends Seeder
         $categories = \App\Models\Category::all();
         factory(\App\Models\Genre::class, 50)
             ->create()
-            ->each(function(Genre $genre) use($categories){
+            ->each(function(\App\Models\Genre $genre) use($categories){
                 $categoriesId = $categories->random(5)->pluck('id')->toArray();
-                $genre->categories()->attatch($categoriesId);
+                $genre->categories()->sync($categoriesId);
             });
     }
 }
