@@ -89,7 +89,7 @@ class Video extends Model
         }
     }
 
-    public function update(array $attributes = [], array $options = []): ?Video
+    public function update(array $attributes = [], array $options = [])
     {
         $files = self::extractFiles($attributes);
         try {

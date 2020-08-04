@@ -73,14 +73,16 @@ class VideoControllerUploadsTest extends BaseVideoControllerTestCase
         $this->assertFilesOnPersist($response, $files);
         $newFiles = [
             'thumb_file' => UploadedFile::fake()->create('thumb_file.jpg'),
-            'video_file' => UploadedFile::fake()->create('video_file.jpg'),
+            'video_file' => UploadedFile::fake()->create('video_file.mp4'),
         ];
         $response = $this->json(
             'PUT',
             $this->routeUpdate(),
             $this->sendData + $newFiles
         );
+
         $response->assertStatus(200);
+
         $this->assertFilesOnPersist($response,
             Arr::except($files, ['thumb_file', 'video_file']) + $newFiles
         );
@@ -115,7 +117,7 @@ class VideoControllerUploadsTest extends BaseVideoControllerTestCase
         return Video::class;
     }
 
-    private function assertFilesOnPersist(\Illuminate\Foundation\Testing\TestResponse $response, array $param)
+    private function assertFilesOnPersist(\Illuminate\Foundation\Testing\TestResponse $response, array $files)
     {
         $id = $response->json('id');
         $video = Video::find($id);
