@@ -20,6 +20,7 @@ steps:
       - GOOGLE_CLOUD_STORAGE_BUCKET=dx-code-micro-videos
       - GOOGLE_CLOUD_STORAGE_API_URI=https://storage.cloud.google.com/dx-code-micro-videos
       - TESTING_PROD=true
+
   - id: "Rodando docker ps"
     name: 'gcr.io/cloud-builders/docker'
     args: ['ps']
@@ -27,6 +28,10 @@ steps:
   - id: "Rodando composer"
     name: 'gcr.io/cloud-builders/docker'
     args: ['exec', '-t', 'app', 'composer', 'install']
+
+  - id: "Rodando artisan config:cache"
+    name: 'gcr.io/cloud-builders/docker'
+    args: ['exec', '-t', 'app', 'php', '/var/www/artisan', 'config:cache']
 
   - id: "Copiando .env"
     name: 'gcr.io/cloud-builders/docker'
