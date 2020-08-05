@@ -53,9 +53,9 @@ steps:
     name: 'gcr.io/cloud-builders/docker'
     args: ['exec', '-t', 'app', 'cat', '.env']
 
-  - id: "Rodando docker verificando .env.testing"
+  - id: "Rodando logs mysql"
     name: 'gcr.io/cloud-builders/docker'
-    args: ['exec', '-t', 'app', 'cat', '.env.testing']
+    args: ['logs', 'db']
 
   - id: "Rodando migrations"
     name: 'gcr.io/cloud-builders/docker'
