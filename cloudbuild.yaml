@@ -33,10 +33,6 @@ steps:
     name: 'gcr.io/cloud-builders/docker'
     args: ['exec', '-t', 'app', 'composer', 'install']
 
-  - id: "Rodando artisan config:cache"
-    name: 'gcr.io/cloud-builders/docker'
-    args: ['exec',  '-t', 'app', 'php', '/var/www/artisan', 'config:cache']
-
   - id: "Copiando .env"
     name: 'gcr.io/cloud-builders/docker'
     args: ['exec', '-t', 'app', 'cp', '.env.example', '.env']
@@ -55,7 +51,7 @@ steps:
 
   - id: "Rodando migrations"
     name: 'gcr.io/cloud-builders/docker'
-    args: ['exec', '-t', 'app', 'php', '/var/www/artisan', 'migrate', '--force', '-v']
+    args: ['exec', '-t', 'app', 'php', '/var/www/artisan', 'migrate', '-v']
 
   - id: "Rodando PHPUNIT"
     name: 'gcr.io/cloud-builders/docker'
