@@ -49,17 +49,13 @@ steps:
     name: 'gcr.io/cloud-builders/docker'
     args: ['exec', '-t', 'app', 'php', '/var/www/artisan', 'key:generate']
 
-  - id: "Rodando docker verificando .env"
-    name: 'gcr.io/cloud-builders/docker'
-    args: ['exec', '-t', 'app', 'cat', '.env']
-
   - id: "Rodando logs mysql"
     name: 'gcr.io/cloud-builders/docker'
     args: ['logs', 'db']
 
   - id: "Rodando migrations"
     name: 'gcr.io/cloud-builders/docker'
-    args: ['exec', '-t', 'app', 'php', '/var/www/artisan', 'migrate', '--force']
+    args: ['exec', '-t', 'app', 'php', '/var/www/artisan', 'migrate', '--force', '-v']
 
   - id: "Rodando PHPUNIT"
     name: 'gcr.io/cloud-builders/docker'
