@@ -45,12 +45,13 @@ steps:
     name: 'gcr.io/cloud-builders/docker'
     args: ['exec', '-t', 'app', 'php', '/var/www/artisan', 'key:generate']
 
-  - id: "Rodando docker ps - verificando .env"
+  - id: "Rodando docker verificando .env"
     name: 'gcr.io/cloud-builders/docker'
-    args:
-      - ps
-      - cat .env
-      - cat .env.testing
+    args: ['exec', '-t', 'app', 'cat', '.env']
+
+  - id: "Rodando docker verificando .env.testing"
+    name: 'gcr.io/cloud-builders/docker'
+    args: ['exec', '-t', 'app', 'cat', '.env.testing']
 
   - id: "Rodando migrations"
     name: 'gcr.io/cloud-builders/docker'
