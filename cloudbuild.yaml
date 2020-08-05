@@ -21,6 +21,10 @@ steps:
       - GOOGLE_CLOUD_STORAGE_API_URI=https://storage.cloud.google.com/dx-code-micro-videos
       - TESTING_PROD=true
 
+  - id: "Chown in /var/www"
+    name: 'gcr.io/cloud-builders/docker'
+    args: ['exec','-u','root','-t','app','chown','-R','www-data:www-data','/var/www']
+
   - id: "Rodando docker ps"
     name: 'gcr.io/cloud-builders/docker'
     args: ['ps']
