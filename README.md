@@ -8,6 +8,9 @@ Microsserviço de catálogo
 
 ## Rodar a aplicação
 
+#### Arquivos .env
+Gere os arquivos antes de criar os containers.
+
 #### Para Windows
 
 (Só funciona no Git Bash ou similar)
