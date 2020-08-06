@@ -24,10 +24,16 @@ RUN rm -rf /var/www/html
 
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
-RUN ln -s public html
+RUN usermod -s /bin/bash -u 1000 -G www-data,root www-data
 
-RUN usermod -u 1000 www-data
-USER www-data
+COPY . /var/www
+#RUN chown -R www-data:www-data /var/www
+# Copy existing application directory permissions
+COPY --chown=www-data . /var/www
+
+RUN chown -R www-data:www-data /var/www/.docker/entrypoint.sh
+
+RUN ln -s public html
 
 EXPOSE 9000
 
