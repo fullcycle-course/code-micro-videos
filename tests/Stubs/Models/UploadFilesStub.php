@@ -31,6 +31,15 @@ class UploadFilesStub extends Model
         \Schema::dropIfExists('upload_file_stubs');
     }
 
+    public function getFileUrl($fileName): ?string
+    {
+        if (empty($fileName)) {
+            return null;
+        }
+
+        return \Storage::url($this->relativeFilePath($fileName));
+    }
+
     public function uploadDir()
     {
         return '1';

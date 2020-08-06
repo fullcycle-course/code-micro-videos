@@ -20,6 +20,11 @@ steps:
       - GOOGLE_CLOUD_STORAGE_BUCKET=dx-code-micro-videos
       - GOOGLE_CLOUD_STORAGE_API_URI=https://storage.cloud.google.com/dx-code-micro-videos
       - TESTING_PROD=true
+
+  - id: "Chown in /var/www"
+    name: 'gcr.io/cloud-builders/docker'
+    args: ['exec','-u','root','-t','app','chown','-R','www-data:www-data','/var/www']
+
   - id: "Rodando docker ps"
     name: 'gcr.io/cloud-builders/docker'
     args: ['ps']
@@ -40,9 +45,13 @@ steps:
     name: 'gcr.io/cloud-builders/docker'
     args: ['exec', '-t', 'app', 'php', '/var/www/artisan', 'key:generate']
 
+  - id: "Rodando logs mysql"
+    name: 'gcr.io/cloud-builders/docker'
+    args: ['logs', 'db']
+
   - id: "Rodando migrations"
     name: 'gcr.io/cloud-builders/docker'
-    args: ['exec', '-t', 'app', 'php', '/var/www/artisan', 'migrate']
+    args: ['exec', '-t', 'app', 'php', '/var/www/artisan', 'migrate', '-v']
 
   - id: "Rodando PHPUNIT"
     name: 'gcr.io/cloud-builders/docker'

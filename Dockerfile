@@ -7,7 +7,8 @@ RUN apk add --no-cache openssl  \
     npm \
     freetype-dev \
     libjpeg-turbo-dev \
-    libpng-dev
+    libpng-dev \
+    shadow
 
 RUN docker-php-ext-install pdo pdo_mysql
 RUN docker-php-ext-configure gd --with-gd --with-freetype-dir=/usr/include --with-jpeg-dir=/usr/include/ --with-png-dir=/usr/include/
@@ -22,6 +23,15 @@ WORKDIR /var/www
 RUN rm -rf /var/www/html
 
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+
+RUN usermod -s /bin/bash -u 1000 -G www-data,root www-data
+
+COPY . /var/www
+#RUN chown -R www-data:www-data /var/www
+# Copy existing application directory permissions
+COPY --chown=www-data . /var/www
+
+RUN chown -R www-data:www-data /var/www/.docker/entrypoint.sh
 
 RUN ln -s public html
 

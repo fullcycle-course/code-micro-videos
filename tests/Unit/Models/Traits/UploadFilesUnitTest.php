@@ -119,11 +119,17 @@ class UploadFilesUnitTest extends TestCase
         $this->assertEquals([$file1, $file2], $files);
     }
 
+    public function testRelativeFilePath(): void
+    {
+        $this->assertEquals('1/video.mp4', $this->obj->relativeFilePath('video.mp4'));
+    }
+
     public function testGetFileUrl(): void
     {
         $file1      = UploadedFile::fake()->create('video1.mp4');
-        $this->assertNotNull(UploadFilesStub::getFileUrl($file1->hashName()));
-        $this->assertNull(UploadFilesStub::getFileUrl(''));
-        $this->assertStringContainsString($file1->hashName(), UploadFilesStub::getFileUrl($file1->hashName()));
+
+        $this->assertNotNull((new UploadFilesStub())->getFileUrl($file1->hashName()));
+        $this->assertNull((new UploadFilesStub())->getFileUrl(''));
+        $this->assertStringContainsString($file1->hashName(), (new UploadFilesStub())->getFileUrl($file1->hashName()));
     }
 }

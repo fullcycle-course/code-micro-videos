@@ -25,7 +25,7 @@ trait TestSaves
         return $response;
     }
 
-    public function assertUpdate(array $sendData, array $testDatabase, array $testJsonData = null): TestResponse
+    public function assertUpdate(array $sendData, array $testDatabase, array $testJsonData = null)
     {
         /** @var TestResponse $response */
         $response = $this->json('PUT', $this->routeUpdate(), $sendData);
