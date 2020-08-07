@@ -3,7 +3,6 @@
 namespace Tests\Feature\Http\Controllers\Api;
 
 use App\Http\Resources\CastMemberResource;
-use App\Http\Resources\CategoryResource;
 use App\Models\CastMember;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Tests\TestCase;
@@ -156,6 +155,6 @@ class CastMemberControllerTest extends TestCase
 
     protected function resource()
     {
-        return CategoryResource::class;
+        return CastMemberResource::class;
     }
 }
