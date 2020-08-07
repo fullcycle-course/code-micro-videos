@@ -14,11 +14,6 @@ class GenreController extends BasicCrudController
         'categories_id' => 'required|array|exists:categories,id,deleted_at,NULL',
     ];
 
-//    public function index()
-//    {
-//        return Genre::all();
-//    }
-
     public function store(Request $request)
     {
         $validatedData = $this->validate($request, $this->rulesStore());
