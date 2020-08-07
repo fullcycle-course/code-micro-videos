@@ -2,17 +2,27 @@
 
 namespace Tests\Feature\Http\Controllers\Api;
 
+use App\Http\Resources\CategoryResource;
 use App\Models\Category;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Tests\TestCase;
+use Tests\Traits\TestResource;
 use Tests\Traits\TestSaves;
 use Tests\Traits\TestValidations;
 
 class CategoryControllerTest extends TestCase
 {
-    use DatabaseMigrations, TestValidations, TestSaves;
+    use DatabaseMigrations, TestValidations, TestSaves, TestResource;
 
     private $category;
+    private $serializedFields = [
+        'id',
+        'name',
+        'description',
+        'created_at',
+        'updated_at',
+        'deleted_at'
+    ];
 
     protected function setUp(): void
     {
@@ -23,14 +33,35 @@ class CategoryControllerTest extends TestCase
     public function testIndex()
     {
         $response = $this->get(route('categories.index'));
+        $response
+            ->assertStatus(200)
+            ->assertJson([
+                'meta' => ['per_page' => 15]
+            ])
+            ->assertJsonStructure([
+                'data' => [
+                    '*' => $this->serializedFields
+                ],
+                'links' => [],
+                'meta' => []
+            ]);
 
-        $response->assertStatus(200)->assertJson([$this->category->toArray()]);
+        $resource = CategoryResource::collection(collect([$this->category]));
+        $this->assertResource($response, $resource);
+
     }
 
     public function testShow()
     {
         $response = $this->get(route('categories.show', ['category' => $this->category->id]));
-        $response->assertStatus(200)->assertJson($this->category->toArray());
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                'data' => $this->serializedFields
+            ]);
+        $id = $response->json('data.id');
+        $resource = new CategoryResource(Category::find($id));
+        $this->assertResource($response, $resource);
+
     }
 
     public function testInvalidationData()
@@ -57,48 +88,60 @@ class CategoryControllerTest extends TestCase
         $data = [
             'name' => 'test',
         ];
-        $this->assertStore($data, $data + ['description' => null, 'is_active' => true, 'deleted_at' => null]);
-
+        $response = $this->assertStore($data, $data + ['description' => null, 'is_active' => true, 'deleted_at' => null]);
+        $response->assertJsonStructure([
+            'data' => $this->serializedFields
+        ]);
         $data = [
-            'name'        => 'test',
+            'name' => 'test',
             'description' => 'description',
-            'is_active'   => false,
+            'is_active' => false,
         ];
         $this->assertStore(
             $data,
             $data + ['description' => 'description', 'is_active' => false],
             [
-                'is_active'   => false,
+                'is_active' => false,
                 'description' => 'description',
             ]
         );
+        $id = $response->json('id');
+        $resource = new CategoryResource(Category::find($id));
+        $this->assertResource($response, $resource);
     }
 
     public function testUpdate()
     {
         $this->category = factory(Category::class)->create([
             'description' => 'description',
-            'is_active'   => false,
+            'is_active' => false,
         ]);
 
-        $data     = [
-            'name'        => 'test',
+        $data = [
+            'name' => 'test',
             'description' => 'test',
-            'is_active'   => true,
+            'is_active' => true,
         ];
-        $this->assertUpdate($data, $data + ['deleted_at' => null]);
+        $response = $this->assertUpdate($data, $data + ['deleted_at' => null]);
+        $response->assertJsonStructure([
+            'data' => $this->serializedFields
+        ]);
 
-        $data     = [
-            'name'        => 'test',
+        $id = $response->json('id');
+        $resource = new CategoryResource(Category::find($id));
+        $this->assertResource($response, $resource);
+
+        $data = [
+            'name' => 'test',
             'description' => '',
-            'is_active'   => true,
+            'is_active' => true,
         ];
         $this->assertUpdate($data, array_merge($data, ['description' => null]));
 
-        $data     = [
-            'name'        => 'test',
+        $data = [
+            'name' => 'test',
             'description' => '',
-            'is_active'   => true,
+            'is_active' => true,
         ];
         $this->assertUpdate($data, array_merge($data, ['description' => null]));
 
