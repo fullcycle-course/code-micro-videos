@@ -9,6 +9,7 @@ class Category extends Model
 {
     use SoftDeletes, Traits\Uuid;
 
+    protected $hidden = ['pivot'];
     protected $fillable     = [
         'name',
         'description',
