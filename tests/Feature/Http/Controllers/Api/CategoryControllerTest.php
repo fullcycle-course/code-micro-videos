@@ -19,6 +19,7 @@ class CategoryControllerTest extends TestCase
         'id',
         'name',
         'description',
+        'is_active',
         'created_at',
         'updated_at',
         'deleted_at'
@@ -27,7 +28,9 @@ class CategoryControllerTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->category = factory(Category::class)->create();
+        $this->category = factory(Category::class)->create([
+            'is_active' => true,
+        ]);
     }
 
     public function testIndex()
@@ -48,7 +51,6 @@ class CategoryControllerTest extends TestCase
 
         $resource = CategoryResource::collection(collect([$this->category]));
         $this->assertResource($response, $resource);
-
     }
 
     public function testShow()
@@ -105,7 +107,7 @@ class CategoryControllerTest extends TestCase
                 'description' => 'description',
             ]
         );
-        $id = $response->json('id');
+        $id = $response->json('data.id');
         $resource = new CategoryResource(Category::find($id));
         $this->assertResource($response, $resource);
     }
@@ -127,7 +129,7 @@ class CategoryControllerTest extends TestCase
             'data' => $this->serializedFields
         ]);
 
-        $id = $response->json('id');
+        $id = $response->json('data.id');
         $resource = new CategoryResource(Category::find($id));
         $this->assertResource($response, $resource);
 

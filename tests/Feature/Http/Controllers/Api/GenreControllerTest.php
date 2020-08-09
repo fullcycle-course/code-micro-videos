@@ -185,11 +185,6 @@ class GenreControllerTest extends TestCase
         ];
         $response = $this->assertStore($data['send_data'], $data['test_data']);
         $this->assertHasCategory($response->json('data.id'), $category->id);
-        $response->assertJson([
-            'data' => [
-                'categories' => [$category->toArray()]
-            ]
-        ]);
         $response->assertJsonStructure([
             'data' => $this->serializedFields
         ]);
