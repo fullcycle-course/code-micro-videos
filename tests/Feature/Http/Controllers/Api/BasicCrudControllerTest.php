@@ -34,7 +34,7 @@ class BasicCrudControllerTest extends TestCase
     {
         /** @var CategoryStub $category */
         $category = CategoryStub::create(['name' => 'test_name', 'description' => 'test_description']);
-        $result   = $this->controller->index()->toArray();
+        $result   = $this->controller->index()->toArray($this->request);
         $this->assertEquals([$category->toArray()], $result);
     }
 
@@ -56,7 +56,7 @@ class BasicCrudControllerTest extends TestCase
         $obj = $this->controller->store($this->request);
         $this->assertEquals(
             CategoryStub::find(1)->toArray(),
-            $obj->toArray()
+            $obj->toArray($this->request)
         );
     }
 
@@ -93,7 +93,7 @@ class BasicCrudControllerTest extends TestCase
         $obj = $this->controller->update($this->request, $category->id);
         $this->assertEquals(
             CategoryStub::find(1)->toArray(),
-            $obj->toArray()
+            $obj->toArray($this->request)
         );
     }
 

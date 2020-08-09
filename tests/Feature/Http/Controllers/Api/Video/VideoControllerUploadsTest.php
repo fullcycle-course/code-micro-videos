@@ -2,6 +2,9 @@
 
 namespace Tests\Feature\Http\Controllers\Api\Video;
 
+use App\Http\Resources\CategoryResource;
+use App\Http\Resources\GenreResource;
+use App\Http\Resources\VideoResource;
 use App\Models\Video;
 use App\Models\Category;
 use App\Models\Genre;
@@ -44,6 +47,11 @@ class VideoControllerUploadsTest extends BaseVideoControllerTestCase
 
     public function testStoreWithFiles(): void
     {
+        $category = Category::find($this->sendData['categories_id'][0]);
+        $genre = Genre::with(['categories'])->find($this->sendData['genres_id'][0]);
+        $categoryResource = new CategoryResource($category);
+        $genreResource = new GenreResource($genre);
+
         \Storage::fake();
         $files = $this->getFiles();
 
@@ -53,7 +61,23 @@ class VideoControllerUploadsTest extends BaseVideoControllerTestCase
             $this->sendData + $files
         );
         $response->assertStatus(201);
-        $id = $response->json('id');
+        $response->assertJson([
+            'data' => [
+                'categories' => [$categoryResource->response()->getData(true)['data']],
+                'genres' => [$genreResource->response()->getData(true)['data']],
+            ],
+        ]);
+
+        foreach($files as $key => $file){
+            $expected = \Storage::url("{$response->json('data.id')}/{$file->hashName()}");
+            $this->assertEquals($expected, $response->json('data')["{$key}_url"]);
+        }
+
+        $id = $response->json('data.id');
+        $resource = new VideoResource(Video::find($id));
+        $this->assertResource($response, $resource);
+
+        $id = $response->json('data.id');
         foreach ($files as $file) {
             \Storage::assertExists("$id/{$file->hashName()}");
         }
@@ -86,7 +110,7 @@ class VideoControllerUploadsTest extends BaseVideoControllerTestCase
         $this->assertFilesOnPersist($response,
             Arr::except($files, ['thumb_file', 'video_file']) + $newFiles
         );
-        $id = $response->json('id');
+        $id = $response->json('data.id');
         $video = Video::find($id);
         \Storage::assertMissing($video->relativeFilePath($files['thumb_file']->hashName()));
         \Storage::assertMissing($video->relativeFilePath($files['video_file']->hashName()));
@@ -119,7 +143,7 @@ class VideoControllerUploadsTest extends BaseVideoControllerTestCase
 
     private function assertFilesOnPersist(\Illuminate\Foundation\Testing\TestResponse $response, array $files)
     {
-        $id = $response->json('id');
+        $id = $response->json('id') ?? $response->json('data.id');
         $video = Video::find($id);
         $this->assertFilesExistsInStorage($video, $files);
     }
