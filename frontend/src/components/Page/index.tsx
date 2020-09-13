@@ -14,12 +14,12 @@ type PageProps = {
 export const Page: React.FC<PageProps> = (props) => {
     const classes = useStyles();
     return (
-        <div>
-            <Container>
-                <Typography className={classes.title}>
-                    {props.title}
-                </Typography>
-            </Container>
-        </div>
+        <Container>
+            <Typography className={classes.title} variant="h5">
+                {props.title}
+            </Typography>
+            {props.children}
+        </Container>
+
     );
 };
