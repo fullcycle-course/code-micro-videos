@@ -2,3 +2,4 @@
 /.idea
 ./.vscode
 .npm-cache
+/frontend/.env
